@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E4;
+    --paper-card:#FFFDF8;
+    --ink:#1D2B3A;
+    --ink-soft:#5B6B7A;
+    --rule:#D9CFB8;
+    --rule-blue:#3B5BA5;
+    --red:#B23A2E;
+    --green:#2F6B4F;
+    --amber:#C68A1E;
+    --red-tint:rgba(178,58,46,0.08);
+    --green-tint:rgba(47,107,79,0.08);
+    --amber-tint:rgba(198,138,30,0.08);
+    --blue-tint:rgba(59,91,165,0.07);
+    --shadow:0 1px 2px rgba(29,43,58,0.07), 0 6px 18px rgba(29,43,58,0.10);
+    --font-display:'Zilla Slab', Georgia, serif;
+    --font-body:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono:'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color:var(--paper);
+    background-image:repeating-linear-gradient(to bottom, rgba(59,91,165,0.05) 0px, rgba(59,91,165,0.05) 1px, transparent 1px, transparent 29px);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:600;}
+  button{font-family:inherit; cursor:pointer;}
+  input,select{font-family:inherit;}
+
+  button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible{
+    outline:2px solid var(--rule-blue);
+    outline-offset:2px;
+  }
+
+  .container{max-width:1080px; margin:0 auto; padding:0 20px 60px;}
+
+  /* ---------- Header ---------- */
+  .ledger-header{
+    background:var(--ink);
+    color:var(--paper-card);
+    border-bottom:4px double var(--rule-blue);
+  }
+  .header-inner{
+    max-width:1080px; margin:0 auto; padding:26px 20px 22px;
+    display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:2.5px;
+    color:#AEBBD0; margin:0 0 6px;
+  }
+  .header-inner h1{font-size:28px; letter-spacing:0.3px;}
+  .date-stamp{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:1px;
+    border:1px solid #4A5A6E; color:#C8D2E0; padding:6px 12px;
+    transform:rotate(-2deg); white-space:nowrap;
+  }
+
+  /* ---------- Month bar ---------- */
+  .month-bar{
+    display:flex; align-items:center; gap:14px; justify-content:center;
+    padding:26px 0 18px; flex-wrap:wrap;
+  }
+  .month-nav{
+    width:34px; height:34px; border:1.5px solid var(--ink); background:var(--paper-card);
+    color:var(--ink); font-size:16px; line-height:1; border-radius:3px;
+  }
+  .month-nav:hover{background:var(--ink); color:var(--paper-card);}
+  .month-label{
+    font-family:var(--font-mono); font-weight:600; font-size:18px; letter-spacing:1px;
+    min-width:200px; text-align:center;
+  }
+  .link-btn{
+    background:none; border:none; color:var(--rule-blue); font-size:13px;
+    text-decoration:underline; padding:4px;
+  }
+  .link-btn.danger{color:var(--red);}
+
+  /* ---------- Stats ---------- */
+  .stats-row{
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:24px;
+  }
+  .stat-card{
+    background:var(--paper-card); border:1px solid var(--rule); border-bottom:3px solid var(--ink);
+    padding:14px 14px 12px; border-radius:2px;
+  }
+  .stat-card.c-paid{border-bottom-color:var(--green);}
+  .stat-card.c-partial{border-bottom-color:var(--amber);}
+  .stat-card.c-pending{border-bottom-color:var(--red);}
+  .stat-card.c-collected{border-bottom-color:var(--rule-blue);}
+  .stat-num{font-family:var(--font-mono); font-size:22px; font-weight:600;}
+  .stat-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft); margin-top:4px;}
+  .stat-sub{font-size:11px; color:var(--ink-soft); margin-top:2px; font-family:var(--font-mono);}
+
+  /* ---------- Controls ---------- */
+  .controls-row{
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:18px;
+  }
+  #searchInput, #classFilterSelect{
+    border:none; border-bottom:2px solid var(--ink); background:transparent;
+    padding:7px 2px; font-size:14px; color:var(--ink);
+  }
+  #searchInput{flex:1; min-width:180px;}
+  #searchInput::placeholder{color:var(--ink-soft);}
+  #classFilterSelect{min-width:130px;}
+
+  .chip-group{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    border:1.5px solid var(--rule); background:var(--paper-card); color:var(--ink-soft);
+    font-size:12px; padding:6px 12px; border-radius:14px; letter-spacing:0.3px;
+  }
+  .chip.active{background:var(--ink); border-color:var(--ink); color:var(--paper-card);}
+
+  .btn-primary, .btn-secondary, .btn-danger{
+    border-radius:3px; padding:9px 16px; font-size:13px; font-weight:600;
+    letter-spacing:0.4px; border:1.5px solid var(--ink);
+  }
+  .btn-primary{background:var(--ink); color:var(--paper-card);}
+  .btn-primary:hover{background:#2A3D52;}
+  .btn-secondary{background:transparent; color:var(--ink);}
+  .btn-secondary:hover{background:var(--blue-tint);}
+  .btn-danger{background:var(--red); color:#FFF6F4; border-color:var(--red);}
+  .btn-danger:hover{background:#9A2F25;}
+
+  /* ---------- Table ---------- */
+  .table-section{background:var(--paper-card); border:1px solid var(--rule); box-shadow:var(--shadow); border-radius:2px;}
+  .table-scroll{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; min-width:880px;}
+  thead th{
+    background:var(--ink); color:var(--paper); font-family:var(--font-mono);
+    font-size:11px; text-transform:uppercase; letter-spacing:1px; text-align:left;
+    padding:11px 12px; position:sticky; top:0;
+  }
+  tbody td{padding:12px; border-bottom:1px solid var(--rule); font-size:13.5px; vertical-align:top;}
+  tbody tr:nth-child(even){background:rgba(59,91,165,0.025);}
+  tbody tr:hover{background:var(--blue-tint);}
+  th:first-child, td:first-child{border-right:3px double var(--red); padding-right:14px;}
+  .muted{color:var(--ink-soft); font-size:12px;}
+  .mono{font-family:var(--font-mono);}
+  .name-cell strong{font-size:14px;}
+  .name-cell .muted{display:block; margin-top:2px;}
+
+  .stamp{
+    display:inline-block; font-family:var(--font-mono); font-size:11px; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; padding:3px 9px; border-radius:2px;
+    border:2px solid; transform:rotate(-3deg);
+  }
+  .stamp-paid{color:var(--green); border-color:var(--green); background:var(--green-tint);}
+  .stamp-partial{color:var(--amber); border-color:var(--amber); background:var(--amber-tint);}
+  .stamp-pending{color:var(--red); border-color:var(--red); background:var(--red-tint);}
+  .stamp-upcoming{color:var(--ink-soft); border-color:var(--rule); background:transparent; transform:none;}
+
+  .row-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .row-actions button{
+    background:none; border:none; font-size:12.5px; font-weight:600; padding:2px 0;
+    text-decoration:underline; color:var(--ink);
+  }
+  .row-actions button.act-pay{color:var(--green);}
+  .row-actions button:disabled{color:var(--rule); text-decoration:none; cursor:not-allowed;}
+
+  /* ---------- Empty states ---------- */
+  .empty-state{padding:60px 20px; text-align:center;}
+  .empty-state h3{font-size:18px; margin-bottom:6px;}
+  .empty-state p{color:var(--ink-soft); margin:0 0 18px; font-size:14px;}
+  .loading-state{padding:50px 20px; text-align:center; color:var(--ink-soft); font-family:var(--font-mono); font-size:13px;}
+
+  /* ---------- Footer ---------- */
+  .app-footer{display:flex; justify-content:space-between; padding:18px 4px 0; flex-wrap:wrap; gap:10px;}
+  .footer-group{display:flex; gap:14px; flex-wrap:wrap;}
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(29,43,58,0.5); display:flex;
+    align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  .modal{
+    background:var(--paper-card); max-width:460px; width:100%; padding:28px 26px;
+    border-radius:2px; box-shadow:var(--shadow); position:relative; max-height:88vh; overflow-y:auto;
+  }
+  .modal.modal-wide{max-width:680px;}
+  .modal.modal-small{max-width:380px;}
+  .modal::before{
+    content:''; position:absolute; top:0; right:0; width:0; height:0;
+    border-style:solid; border-width:0 22px 22px 0;
+    border-color:transparent var(--paper) transparent transparent;
+    filter:drop-shadow(-2px 2px 2px rgba(0,0,0,0.15));
+  }
+  .modal-close{
+    position:absolute; top:14px; right:14px; background:none; border:none;
+    font-size:20px; line-height:1; color:var(--ink-soft); padding:4px;
+  }
+  .modal-title{font-size:20px; margin-bottom:18px; padding-right:20px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:4px; letter-spacing:0.3px;}
+  .field input, .field select{
+    width:100%; border:1px solid var(--rule); border-radius:3px; padding:9px 10px;
+    font-size:14px; background:var(--paper); color:var(--ink);
+  }
+  .field-row{display:flex; gap:12px;}
+  .field-row .field{flex:1;}
+  .error{color:var(--red); font-size:11.5px; display:block; min-height:14px; margin-top:3px;}
+  .form-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:18px;}
+
+  /* ---------- Detail modal ---------- */
+  .detail-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:6px;}
+  .detail-head h2{font-size:21px;}
+  .detail-sub{color:var(--ink-soft); font-size:13px; margin-bottom:16px;}
+  .detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:18px; font-size:13.5px;}
+  .detail-grid div span{display:block; font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px;}
+  .balance-banner{
+    border:1px solid var(--rule); border-left:4px solid var(--ink); padding:10px 14px;
+    margin-bottom:18px; font-size:13.5px; border-radius:2px; background:var(--paper);
+  }
+  .balance-banner.due{border-left-color:var(--red);}
+  .balance-banner.clear{border-left-color:var(--green);}
+  .detail-actions{display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;}
+  .detail-actions button{padding:7px 13px; font-size:12.5px;}
+  .pay-history h3{font-size:14px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;}
+  .pay-row{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:9px 0; border-bottom:1px solid var(--rule); font-size:13px;
+  }
+  .pay-row .pay-note{color:var(--ink-soft); font-size:11.5px;}
+  .pay-row button{background:none; border:none; color:var(--red); font-size:16px; padding:2px 6px;}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:22px; right:22px; background:var(--ink); color:var(--paper-card);
+    padding:11px 18px; border-radius:3px; font-size:13.5px; box-shadow:var(--shadow); z-index:80;
+  }
+  .toast.error{background:var(--red);}
+
+  /* ---------- Lock screen ---------- */
+  .lock-screen{
+    position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+    padding:20px; background-color:var(--paper);
+    background-image:repeating-linear-gradient(to bottom, rgba(59,91,165,0.05) 0px, rgba(59,91,165,0.05) 1px, transparent 1px, transparent 29px);
+  }
+  .lock-card{
+    background:var(--paper-card); max-width:360px; width:100%; padding:34px 30px;
+    border:1px solid var(--rule); border-radius:2px; box-shadow:var(--shadow);
+    text-align:center; position:relative;
+  }
+  .lock-card::before{
+    content:''; position:absolute; top:0; right:0; width:0; height:0;
+    border-style:solid; border-width:0 22px 22px 0;
+    border-color:transparent var(--paper) transparent transparent;
+    filter:drop-shadow(-2px 2px 2px rgba(0,0,0,0.15));
+  }
+  .lock-icon{margin:0 auto 14px;}
+  .lock-card h2{font-size:20px; margin-bottom:6px;}
+  .lock-card .detail-sub{margin-bottom:20px;}
+  .lock-form{text-align:left;}
+  .lock-form .btn-primary{width:100%; margin-top:4px;}
+
+  @media (max-width:760px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .header-inner{flex-direction:column; align-items:flex-start;}
+    .detail-grid{grid-template-columns:1fr;}
+    .controls-row{flex-direction:column; align-items:stretch;}
+    .app-footer{flex-direction:column;}
+  }
+
+  .toast{transition:opacity 0.25s ease;}
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-card">
+      <div class="lock-icon">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1D2B3A" stroke-width="1.6">
+          <rect x="5" y="11" width="14" height="9" rx="1.5"></rect>
+          <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+        </svg>
+      </div>
+      <h2 id="lockTitle">Set a Password</h2>
+      <p class="detail-sub" id="lockSubtitle">Create a password to protect this register.</p>
+
+      <form id="setPasswordForm" class="lock-form">
+        <div class="field">
+          <label for="sp_password">New password</label>
+          <input id="sp_password" type="password" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="sp_confirm">Confirm password</label>
+          <input id="sp_confirm" type="password" autocomplete="new-password">
+        </div>
+        <span class="error" id="err_setpw"></span>
+        <button type="submit" class="btn-primary">Set Password &amp; Continue</button>
+      </form>
+
+      <form id="enterPasswordForm" class="lock-form" hidden>
+        <div class="field">
+          <label for="ep_password">Password</label>
+          <input id="ep_password" type="password" autocomplete="current-password">
+        </div>
+        <span class="error" id="err_enterpw"></span>
+        <button type="submit" class="btn-primary">Unlock</button>
+        <button type="button" class="link-btn" id="forgotPwBtn" style="margin-top:10px;">Forgot password?</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="appRoot" hidden>
+
+  <header class="ledger-header">
+    <div class="header-inner">
+      <div>
+        <p class="eyebrow">STUDENT FEE REGISTER</p>
+        <h1>Who's Paid, Who Hasn't</h1>
+      </div>
+      <div class="date-stamp" id="todayStamp"></div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="month-bar">
+      <button class="month-nav" id="prevMonthBtn" aria-label="Previous month">‹</button>
+      <div class="month-label" id="monthLabel">—</div>
+      <button class="month-nav" id="nextMonthBtn" aria-label="Next month">›</button>
+      <button class="link-btn" id="thisMonthBtn" hidden>Jump to this month</button>
+    </section>
+
+    <section class="stats-row" id="statsRow"></section>
+
+    <section class="controls-row">
+      <input id="searchInput" type="text" placeholder="Search by name or roll no.">
+      <select id="classFilterSelect"><option value="">All courses</option></select>
+      <div class="chip-group" id="statusChips">
+        <button class="chip active" data-status="">All</button>
+        <button class="chip" data-status="pending">Pending</button>
+        <button class="chip" data-status="partial">Partial</button>
+        <button class="chip" data-status="paid">Paid</button>
+      </div>
+      <button class="btn-primary" id="openAddStudent">+ Register Student</button>
+    </section>
+
+    <section class="table-section" id="tableSection">
+      <div class="loading-state">Loading your register…</div>
+    </section>
+
+    <footer class="app-footer">
+      <div class="footer-group">
+        <button class="link-btn" id="exportCsvBtn">Export this view (CSV)</button>
+        <button class="link-btn" id="changePwBtn">Change password</button>
+        <button class="link-btn" id="lockNowBtn">Lock now</button>
+      </div>
+      <button class="link-btn danger" id="resetDataBtn">Clear all data</button>
+    </footer>
+
+  </main>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Student add/edit modal -->
+  <div id="studentModalOverlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle">
+      <button class="modal-close" id="studentModalClose" aria-label="Close">×</button>
+      <h2 id="studentModalTitle" class="modal-title">Register Student</h2>
+      <form id="studentForm">
+        <div class="field">
+          <label for="f_name">Student name *</label>
+          <input id="f_name" type="text" autocomplete="off">
+          <span class="error" id="err_name"></span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_class">Course</label>
+            <select id="f_class"></select>
+            <input id="f_class_new" type="text" placeholder="Type new course name" hidden style="margin-top:6px;">
+          </div>
+          <div class="field">
+            <label for="f_roll">Roll number</label>
+            <input id="f_roll" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_parent">Parent / guardian name</label>
+            <input id="f_parent" type="text" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="f_contact">Contact number</label>
+            <input id="f_contact" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_fee">Monthly fee (₹) *</label>
+            <input id="f_fee" type="number" min="0" step="1">
+            <span class="error" id="err_fee"></span>
+          </div>
+          <div class="field">
+            <label for="f_admission">Fees due from</label>
+            <input id="f_admission" type="month">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="studentCancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="studentSaveBtn">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail modal -->
+  <div id="detailModalOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true">
+      <button class="modal-close" id="detailModalClose" aria-label="Close">×</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Payment modal -->
+  <div id="paymentModalOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-small" role="dialog" aria-modal="true">
+      <button class="modal-close" id="paymentModalClose" aria-label="Close">×</button>
+      <h2 class="modal-title">Record a Payment</h2>
+      <p class="detail-sub" id="pm_studentName"></p>
+      <form id="paymentForm">
+        <div class="field">
+          <label for="pm_month">Fee for month</label>
+          <input id="pm_month" type="month">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="pm_amount">Amount (₹) *</label>
+            <input id="pm_amount" type="number" min="0" step="1">
+            <span class="error" id="err_amount"></span>
+          </div>
+          <div class="field">
+            <label for="pm_date">Date paid</label>
+            <input id="pm_date" type="date">
+          </div>
+        </div>
+        <div class="field">
+          <label for="pm_note">Note (optional)</label>
+          <input id="pm_note" type="text" placeholder="e.g. paid by cash">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="paymentCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Record Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div id="confirmOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-small" role="alertdialog" aria-modal="true">
+      <h3 id="confirmTitle" style="margin-bottom:8px; font-size:17px;"></h3>
+      <p id="confirmMessage" style="color:var(--ink-soft); font-size:13.5px; margin:0 0 4px;"></p>
+      <div class="form-actions">
+        <button class="btn-secondary" id="confirmCancelBtn">Cancel</button>
+        <button class="btn-danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change password modal -->
+  <div id="changePwOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-small" role="dialog" aria-modal="true">
+      <button class="modal-close" id="changePwClose" aria-label="Close">×</button>
+      <h2 class="modal-title">Change Password</h2>
+      <form id="changePwForm">
+        <div class="field">
+          <label for="cp_current">Current password</label>
+          <input id="cp_current" type="password" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label for="cp_new">New password</label>
+          <input id="cp_new" type="password" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="cp_confirm">Confirm new password</label>
+          <input id="cp_confirm" type="password" autocomplete="new-password">
+        </div>
+        <span class="error" id="err_changepw"></span>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="changePwCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = 'students-data';
+  var COURSE_KEY = 'course-types';
+  var PASSWORD_KEY = 'app-password';
+  var DEFAULT_COURSES = ['O Level','A Level','B Level','ADCA','DCA','CCC','Tally Prime','Tally ERP 9','Typewriting (English)','Typewriting (Hindi)','DTP (Desktop Publishing)','Web Designing','MS Office','CorelDRAW','Spoken English','Programming (C/C++)','Hardware & Networking','Photoshop / Graphic Designing','Internet & Email'];
+  var students = [];
+  var courseTypes = [];
+  var storedPasswordHash = null;
+  var currentMonth = getRealCurrentMonth();
+  var searchTerm = '';
+  var classFilter = '';
+  var statusFilter = '';
+  var confirmAction = null;
+  var paymentContext = { studentId: null };
+
+  // ---------- Utilities ----------
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function getRealCurrentMonth(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1);
+  }
+  function getRealTodayDate(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+  function addMonths(monthStr, delta){
+    var parts = monthStr.split('-').map(Number);
+    var total = (parts[0]*12 + (parts[1]-1)) + delta;
+    var ny = Math.floor(total/12);
+    var nm = (total % 12) + 1;
+    return ny + '-' + pad(nm);
+  }
+  function monthLabel(monthStr){
+    var parts = monthStr.split('-').map(Number);
+    var d = new Date(parts[0], parts[1]-1, 1);
+    return d.toLocaleString('en-IN', { month:'long', year:'numeric' });
+  }
+  function formatINR(num){
+    var n = Number(num) || 0;
+    return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits:0 });
+  }
+  function formatDate(dateStr){
+    if(!dateStr) return '—';
+    var parts = dateStr.split('-').map(Number);
+    var d = new Date(parts[0], parts[1]-1, parts[2]);
+    return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function uid(){
+    if(window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2,9);
+  }
+  function escapeHtml(str){
+    if(str === undefined || str === null) return '';
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  async function sha256(text){
+    var enc = new TextEncoder().encode(text);
+    var buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
+
+  // ---------- Storage (localStorage) ----------
+  function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+  function lsSet(key, val){ try{ localStorage.setItem(key, val); return true; }catch(e){ return false; } }
+  function lsDel(key){ try{ localStorage.removeItem(key); }catch(e){} }
+
+  async function loadStudents(){
+    try{ var raw = lsGet(STORAGE_KEY); students = raw ? JSON.parse(raw) : []; }
+    catch(e){ students = []; }
+  }
+  async function saveStudents(){
+    var ok = lsSet(STORAGE_KEY, JSON.stringify(students));
+    if(!ok) showToast('Could not save — please try again', 'error');
+    return ok;
+  }
+  async function loadCourseTypes(){
+    try{
+      var raw = lsGet(COURSE_KEY);
+      if(raw){ courseTypes = JSON.parse(raw); }
+      else { courseTypes = DEFAULT_COURSES.slice(); saveCourseTypes(); }
+    }catch(e){ courseTypes = DEFAULT_COURSES.slice(); saveCourseTypes(); }
+  }
+  function saveCourseTypes(){ lsSet(COURSE_KEY, JSON.stringify(courseTypes)); }
+  async function loadPasswordHash(){
+    storedPasswordHash = lsGet(PASSWORD_KEY) || null;
+  }
+
+  // ---------- Domain logic ----------
+  function findStudent(id){
+    return students.find(function(s){ return s.id === id; });
+  }
+  function paidForMonth(student, month){
+    return student.payments
+      .filter(function(p){ return p.month === month; })
+      .reduce(function(sum,p){ return sum + Number(p.amount || 0); }, 0);
+  }
+  function statusForMonth(student, month){
+    if(month < student.admissionMonth) return 'upcoming';
+    var paid = paidForMonth(student, month);
+    if(paid <= 0) return 'pending';
+    if(paid < student.monthlyFee) return 'partial';
+    return 'paid';
+  }
+  function lastPaymentDate(student){
+    if(!student.payments.length) return null;
+    return student.payments.reduce(function(latest,p){
+      return (!latest || p.date > latest) ? p.date : latest;
+    }, null);
+  }
+  function totalPaidAllTime(student){
+    return student.payments.reduce(function(sum,p){ return sum + Number(p.amount || 0); }, 0);
+  }
+  function computeOutstanding(student){
+    var nowMonth = getRealCurrentMonth();
+    var totalDue = 0;
+    var m = student.admissionMonth;
+    var guard = 0;
+    while(m <= nowMonth && guard < 2000){
+      totalDue += Number(student.monthlyFee || 0);
+      m = addMonths(m, 1);
+      guard++;
+    }
+    var totalPaidTillNow = student.payments
+      .filter(function(p){ return p.month <= nowMonth; })
+      .reduce(function(sum,p){ return sum + Number(p.amount || 0); }, 0);
+    return { totalDue: totalDue, totalPaid: totalPaidTillNow, balance: totalDue - totalPaidTillNow };
+  }
+  function getNextDueMonth(student){
+    var nowMonth = getRealCurrentMonth();
+    var ceiling = currentMonth > nowMonth ? currentMonth : nowMonth;
+    var m = student.admissionMonth;
+    var guard = 0;
+    while(m <= ceiling && guard < 2000){
+      if(statusForMonth(student, m) !== 'paid') return m;
+      m = addMonths(m, 1);
+      guard++;
+    }
+    return m;
+  }
+
+  // ---------- Rendering ----------
+  function renderAll(){
+    renderTodayStamp();
+    renderMonthBar();
+    renderStats();
+    renderClassOptions();
+    renderTable();
+  }
+
+  function renderTodayStamp(){
+    document.getElementById('todayStamp').textContent = 'TODAY — ' + formatDate(getRealTodayDate()).toUpperCase();
+  }
+
+  function renderMonthBar(){
+    document.getElementById('monthLabel').textContent = monthLabel(currentMonth);
+    document.getElementById('thisMonthBtn').hidden = (currentMonth === getRealCurrentMonth());
+  }
+
+  function renderStats(){
+    var enrolled = students.filter(function(s){ return s.admissionMonth <= currentMonth; });
+    var paidC = 0, partialC = 0, pendingC = 0, collected = 0, expected = 0;
+    enrolled.forEach(function(s){
+      var st = statusForMonth(s, currentMonth);
+      if(st === 'paid') paidC++;
+      else if(st === 'partial') partialC++;
+      else if(st === 'pending') pendingC++;
+      collected += paidForMonth(s, currentMonth);
+      expected += Number(s.monthlyFee || 0);
+    });
+
+    var html =
+      '<div class="stat-card"><div class="stat-num">' + enrolled.length + '</div><div class="stat-label">Enrolled</div></div>' +
+      '<div class="stat-card c-paid"><div class="stat-num">' + paidC + '</div><div class="stat-label">Paid</div></div>' +
+      '<div class="stat-card c-partial"><div class="stat-num">' + partialC + '</div><div class="stat-label">Partial</div></div>' +
+      '<div class="stat-card c-pending"><div class="stat-num">' + pendingC + '</div><div class="stat-label">Pending</div></div>' +
+      '<div class="stat-card c-collected"><div class="stat-num">' + formatINR(collected) + '</div><div class="stat-label">Collected</div><div class="stat-sub">of ' + formatINR(expected) + ' expected</div></div>';
+    document.getElementById('statsRow').innerHTML = html;
+  }
+
+  function renderClassOptions(){
+    var select = document.getElementById('classFilterSelect');
+    var current = select.value;
+    var existingClasses = Array.from(new Set(students.map(function(s){ return (s.className || '').trim(); }).filter(Boolean)));
+    var all = Array.from(new Set(courseTypes.concat(existingClasses))).sort(function(a,b){ return a.localeCompare(b); });
+    select.innerHTML = '<option value="">All courses</option>' +
+      all.map(function(c){ return '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>'; }).join('');
+    if(all.indexOf(current) !== -1) select.value = current;
+  }
+
+  function populateCourseSelect(selectEl, selectedValue){
+    var list = courseTypes.slice();
+    if(selectedValue && list.indexOf(selectedValue) === -1) list.push(selectedValue);
+    list.sort(function(a,b){ return a.localeCompare(b); });
+    var html = '<option value="">— Select course —</option>' +
+      list.map(function(c){ return '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>'; }).join('') +
+      '<option value="__new__">+ Add new course…</option>';
+    selectEl.innerHTML = html;
+    selectEl.value = selectedValue || '';
+    var newInput = document.getElementById('f_class_new');
+    newInput.hidden = true;
+    newInput.value = '';
+  }
+
+  function statusRank(st){
+    return { pending:0, partial:1, paid:2, upcoming:3 }[st];
+  }
+
+  function renderTable(){
+    var section = document.getElementById('tableSection');
+
+    if(students.length === 0){
+      section.innerHTML =
+        '<div class="empty-state">' +
+          '<h3>No students registered yet</h3>' +
+          '<p>Register your first student to start tracking monthly fees.</p>' +
+          '<button class="btn-primary" id="emptyAddBtn">+ Register Student</button>' +
+        '</div>';
+      document.getElementById('emptyAddBtn').addEventListener('click', openAddStudentModal);
+      return;
+    }
+
+    var term = searchTerm.toLowerCase();
+    var filtered = students.filter(function(s){
+      var matchesSearch = !term ||
+        (s.name||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.rollNumber||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.className||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.parentName||'').toLowerCase().indexOf(term) !== -1;
+      var matchesClass = !classFilter || s.className === classFilter;
+      var matchesStatus = !statusFilter || statusForMonth(s, currentMonth) === statusFilter;
+      return matchesSearch && matchesClass && matchesStatus;
+    });
+
+    filtered.sort(function(a,b){
+      var ra = statusRank(statusForMonth(a, currentMonth));
+      var rb = statusRank(statusForMonth(b, currentMonth));
+      if(ra !== rb) return ra - rb;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+
+    if(filtered.length === 0){
+      section.innerHTML = '<div class="empty-state"><h3>No matching records</h3><p>Try a different search, class or status filter.</p></div>';
+      return;
+    }
+
+    var rows = filtered.map(function(s){
+      var st = statusForMonth(s, currentMonth);
+      var paid = paidForMonth(s, currentMonth);
+      var last = lastPaymentDate(s);
+      var contactLine = [s.parentName, s.contact].filter(Boolean).join(' • ');
+
+      var stampClass = 'stamp-' + st;
+      var stampText = st === 'upcoming' ? 'NOT YET DUE' : st.toUpperCase();
+
+      var payDisabled = st === 'upcoming';
+      var payBtn = '<button class="act-pay" data-action="pay" data-id="' + s.id + '"' + (payDisabled ? ' disabled' : '') + '>Record payment</button>';
+
+      return '<tr>' +
+        '<td class="mono">' + escapeHtml(s.rollNumber || '—') + '</td>' +
+        '<td class="name-cell"><strong>' + escapeHtml(s.name) + '</strong>' +
+          (contactLine ? '<span class="muted">' + escapeHtml(contactLine) + '</span>' : '') +
+        '</td>' +
+        '<td>' + escapeHtml(s.className || '—') + '</td>' +
+        '<td class="mono">' + formatINR(s.monthlyFee) + '</td>' +
+        '<td><span class="stamp ' + stampClass + '">' + stampText + '</span></td>' +
+        '<td class="mono">' + (st === 'upcoming' ? '—' : formatINR(paid)) + '</td>' +
+        '<td class="mono">' + (last ? formatDate(last) : '—') + '</td>' +
+        '<td><div class="row-actions">' + payBtn + '<button data-action="view" data-id="' + s.id + '">View</button></div></td>' +
+      '</tr>';
+    }).join('');
+
+    section.innerHTML =
+      '<div class="table-scroll"><table>' +
+      '<thead><tr><th>Roll No.</th><th>Name</th><th>Course</th><th>Monthly Fee</th><th>Status</th><th>Paid (' + monthLabel(currentMonth).split(' ')[0] + ')</th><th>Last Payment</th><th>Actions</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '</table></div>';
+
+    section.querySelectorAll('button[data-action="pay"]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openPaymentModal(btn.dataset.id, currentMonth); });
+    });
+    section.querySelectorAll('button[data-action="view"]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openDetailModal(btn.dataset.id); });
+    });
+  }
+
+  // ---------- Toast ----------
+  var toastTimer = null;
+  function showToast(message, type){
+    var el = document.getElementById('toast');
+    el.textContent = message;
+    el.className = 'toast' + (type === 'error' ? ' error' : '');
+    el.hidden = false;
+    el.style.opacity = '1';
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){
+      el.style.opacity = '0';
+      setTimeout(function(){ el.hidden = true; }, 250);
+    }, 2400);
+  }
+
+  // ---------- Confirm modal ----------
+  function showConfirm(title, message, onConfirm){
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    confirmAction = onConfirm;
+    document.getElementById('confirmOverlay').hidden = false;
+  }
+  function closeConfirm(){
+    document.getElementById('confirmOverlay').hidden = true;
+    confirmAction = null;
+  }
+
+  // ---------- Student add/edit modal ----------
+  var editingStudentId = null;
+
+  function openAddStudentModal(){
+    editingStudentId = null;
+    document.getElementById('studentModalTitle').textContent = 'Register Student';
+    document.getElementById('studentForm').reset();
+    populateCourseSelect(document.getElementById('f_class'), '');
+    document.getElementById('f_admission').value = currentMonth;
+    document.getElementById('err_name').textContent = '';
+    document.getElementById('err_fee').textContent = '';
+    document.getElementById('studentModalOverlay').hidden = false;
+    document.getElementById('f_name').focus();
+  }
+
+  function openEditStudentModal(id){
+    var s = findStudent(id);
+    if(!s) return;
+    editingStudentId = id;
+    document.getElementById('studentModalTitle').textContent = 'Edit Student';
+    document.getElementById('f_name').value = s.name || '';
+    populateCourseSelect(document.getElementById('f_class'), s.className || '');
+    document.getElementById('f_roll').value = s.rollNumber || '';
+    document.getElementById('f_parent').value = s.parentName || '';
+    document.getElementById('f_contact').value = s.contact || '';
+    document.getElementById('f_fee').value = s.monthlyFee;
+    document.getElementById('f_admission').value = s.admissionMonth;
+    document.getElementById('err_name').textContent = '';
+    document.getElementById('err_fee').textContent = '';
+    document.getElementById('studentModalOverlay').hidden = false;
+    document.getElementById('f_name').focus();
+  }
+
+  function closeStudentModal(){
+    document.getElementById('studentModalOverlay').hidden = true;
+  }
+
+  async function handleStudentSubmit(e){
+    e.preventDefault();
+    var name = document.getElementById('f_name').value.trim();
+    var feeVal = document.getElementById('f_fee').value;
+    var fee = parseFloat(feeVal);
+    var admission = document.getElementById('f_admission').value || currentMonth;
+
+    var nameErr = document.getElementById('err_name');
+    var feeErr = document.getElementById('err_fee');
+    nameErr.textContent = '';
+    feeErr.textContent = '';
+    var valid = true;
+    if(!name){ nameErr.textContent = 'Please enter the student\'s name.'; valid = false; }
+    if(!feeVal || isNaN(fee) || fee <= 0){ feeErr.textContent = 'Enter a monthly fee greater than 0.'; valid = false; }
+    if(!valid) return;
+
+    var classSelectVal = document.getElementById('f_class').value;
+    var className = '';
+    if(classSelectVal === '__new__'){
+      className = document.getElementById('f_class_new').value.trim();
+      if(className && courseTypes.map(function(c){ return c.toLowerCase(); }).indexOf(className.toLowerCase()) === -1){
+        courseTypes.push(className);
+        await saveCourseTypes();
+      }
+    } else {
+      className = classSelectVal;
+    }
+
+    var data = {
+      name: name,
+      className: className,
+      rollNumber: document.getElementById('f_roll').value.trim(),
+      parentName: document.getElementById('f_parent').value.trim(),
+      contact: document.getElementById('f_contact').value.trim(),
+      monthlyFee: fee,
+      admissionMonth: admission
+    };
+
+    if(editingStudentId){
+      var existing = findStudent(editingStudentId);
+      Object.assign(existing, data);
+      showToast('Student updated');
+    } else {
+      data.id = uid();
+      data.payments = [];
+      students.push(data);
+      showToast('Student registered');
+    }
+
+    await saveStudents();
+    closeStudentModal();
+    renderAll();
+  }
+
+  // ---------- Payment modal ----------
+  function openPaymentModal(studentId, defaultMonth){
+    var s = findStudent(studentId);
+    if(!s) return;
+    paymentContext.studentId = studentId;
+    var month = defaultMonth || currentMonth;
+    document.getElementById('pm_studentName').textContent = s.name + (s.className ? ' • ' + s.className : '');
+    document.getElementById('pm_month').value = month;
+    var remaining = Math.max(Number(s.monthlyFee || 0) - paidForMonth(s, month), 0);
+    document.getElementById('pm_amount').value = remaining > 0 ? remaining : s.monthlyFee;
+    document.getElementById('pm_date').value = getRealTodayDate();
+    document.getElementById('pm_note').value = '';
+    document.getElementById('err_amount').textContent = '';
+    document.getElementById('paymentModalOverlay').hidden = false;
+    document.getElementById('pm_amount').focus();
+  }
+  function closePaymentModal(){
+    document.getElementById('paymentModalOverlay').hidden = true;
+  }
+
+  async function handlePaymentSubmit(e){
+    e.preventDefault();
+    var s = findStudent(paymentContext.studentId);
+    if(!s) return;
+    var month = document.getElementById('pm_month').value;
+    var amount = parseFloat(document.getElementById('pm_amount').value);
+    var date = document.getElementById('pm_date').value || getRealTodayDate();
+    var note = document.getElementById('pm_note').value.trim();
+    var amountErr = document.getElementById('err_amount');
+    amountErr.textContent = '';
+
+    if(!month){ amountErr.textContent = 'Please choose a month.'; return; }
+    if(isNaN(amount) || amount <= 0){ amountErr.textContent = 'Enter an amount greater than 0.'; return; }
+
+    s.payments.push({ id: uid(), month: month, amount: amount, date: date, note: note });
+    await saveStudents();
+    closePaymentModal();
+    renderAll();
+    if(!document.getElementById('detailModalOverlay').hidden){
+      renderDetailContent(s.id);
+    }
+    showToast('Payment recorded for ' + monthLabel(month));
+  }
+
+  // ---------- Detail modal ----------
+  function openDetailModal(id){
+    renderDetailContent(id);
+    document.getElementById('detailModalOverlay').hidden = false;
+  }
+  function closeDetailModal(){
+    document.getElementById('detailModalOverlay').hidden = true;
+  }
+
+  function renderDetailContent(id){
+    var s = findStudent(id);
+    if(!s){ closeDetailModal(); return; }
+    var outstanding = computeOutstanding(s);
+    var balance = outstanding.balance;
+    var bannerClass = balance > 0 ? 'due' : (balance < 0 ? 'clear' : 'clear');
+    var bannerText = balance > 0
+      ? 'Outstanding: ' + formatINR(balance) + ' due across all months till date'
+      : (balance < 0 ? 'Paid in advance by ' + formatINR(-balance) : 'All caught up — no balance due');
+
+    var paymentsSorted = s.payments.slice().sort(function(a,b){
+      if(a.month !== b.month) return b.month.localeCompare(a.month);
+      return (b.date||'').localeCompare(a.date||'');
+    });
+
+    var paymentRows = paymentsSorted.length === 0
+      ? '<p class="muted">No payments recorded yet.</p>'
+      : paymentsSorted.map(function(p){
+          return '<div class="pay-row">' +
+            '<div><strong>' + monthLabel(p.month) + '</strong> — ' + formatINR(p.amount) +
+              '<div class="pay-note">' + formatDate(p.date) + (p.note ? ' • ' + escapeHtml(p.note) : '') + '</div>' +
+            '</div>' +
+            '<button data-action="delete-payment" data-pid="' + p.id + '" aria-label="Delete payment">×</button>' +
+          '</div>';
+        }).join('');
+
+    var html =
+      '<div class="detail-head"><h2>' + escapeHtml(s.name) + '</h2></div>' +
+      '<p class="detail-sub">' + escapeHtml(s.className || 'No course set') + (s.rollNumber ? ' • Roll No. ' + escapeHtml(s.rollNumber) : '') + '</p>' +
+      '<div class="detail-grid">' +
+        '<div><span>Parent / Guardian</span>' + escapeHtml(s.parentName || '—') + '</div>' +
+        '<div><span>Contact</span>' + escapeHtml(s.contact || '—') + '</div>' +
+        '<div><span>Monthly Fee</span>' + formatINR(s.monthlyFee) + '</div>' +
+        '<div><span>Fees Due From</span>' + monthLabel(s.admissionMonth) + '</div>' +
+      '</div>' +
+      '<div class="balance-banner ' + bannerClass + '">' + bannerText + '</div>' +
+      '<div class="detail-actions">' +
+        '<button class="btn-primary" data-action="add-payment">+ Add Payment</button>' +
+        '<button class="btn-secondary" data-action="edit-student">Edit Details</button>' +
+        '<button class="btn-secondary" data-action="delete-student" style="color:var(--red); border-color:var(--red);">Delete Student</button>' +
+      '</div>' +
+      '<div class="pay-history"><h3>Payment History</h3>' + paymentRows + '</div>';
+
+    var container = document.getElementById('detailContent');
+    container.innerHTML = html;
+
+    container.querySelector('[data-action="add-payment"]').addEventListener('click', function(){
+      openPaymentModal(s.id, getNextDueMonth(s));
+    });
+    container.querySelector('[data-action="edit-student"]').addEventListener('click', function(){
+      closeDetailModal();
+      openEditStudentModal(s.id);
+    });
+    container.querySelector('[data-action="delete-student"]').addEventListener('click', function(){
+      showConfirm('Delete ' + s.name + '?', 'This removes the student and their entire payment history. This cannot be undone.', async function(){
+        students = students.filter(function(x){ return x.id !== s.id; });
+        await saveStudents();
+        closeDetailModal();
+        renderAll();
+        showToast('Student deleted');
+      });
+    });
+    container.querySelectorAll('[data-action="delete-payment"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pid = btn.dataset.pid;
+        showConfirm('Delete this payment?', 'This payment record will be permanently removed.', async function(){
+          s.payments = s.payments.filter(function(p){ return p.id !== pid; });
+          await saveStudents();
+          renderDetailContent(s.id);
+          renderAll();
+          showToast('Payment removed');
+        });
+      });
+    });
+  }
+
+  // ---------- CSV export ----------
+  function csvEscape(val){
+    var str = String(val === undefined || val === null ? '' : val);
+    if(/[",\n]/.test(str)) return '"' + str.replace(/"/g,'""') + '"';
+    return str;
+  }
+  function exportCSV(){
+    var term = searchTerm.toLowerCase();
+    var filtered = students.filter(function(s){
+      var matchesSearch = !term ||
+        (s.name||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.rollNumber||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.className||'').toLowerCase().indexOf(term) !== -1 ||
+        (s.parentName||'').toLowerCase().indexOf(term) !== -1;
+      var matchesClass = !classFilter || s.className === classFilter;
+      var matchesStatus = !statusFilter || statusForMonth(s, currentMonth) === statusFilter;
+      return matchesSearch && matchesClass && matchesStatus;
+    });
+
+    if(filtered.length === 0){
+      showToast('Nothing to export for this view', 'error');
+      return;
+    }
+
+    var header = ['Roll No','Name','Course','Parent/Guardian','Contact','Monthly Fee','Status (' + monthLabel(currentMonth) + ')','Paid This Month','Last Payment Date'];
+    var rows = filtered.map(function(s){
+      var st = statusForMonth(s, currentMonth);
+      var last = lastPaymentDate(s);
+      return [
+        s.rollNumber || '', s.name || '', s.className || '', s.parentName || '', s.contact || '',
+        s.monthlyFee, st, st === 'upcoming' ? '' : paidForMonth(s, currentMonth), last ? formatDate(last) : ''
+      ];
+    });
+    var csv = [header].concat(rows).map(function(r){ return r.map(csvEscape).join(','); }).join('\n');
+    var blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'fee-status-' + currentMonth + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- Password lock screen ----------
+  function showSetPasswordScreen(){
+    document.getElementById('lockScreen').hidden = false;
+    document.getElementById('appRoot').hidden = true;
+    document.getElementById('lockTitle').textContent = 'Set a Password';
+    document.getElementById('lockSubtitle').textContent = "Create a password to protect this register. You'll need it each time you open this page.";
+    document.getElementById('setPasswordForm').hidden = false;
+    document.getElementById('enterPasswordForm').hidden = true;
+    document.getElementById('sp_password').value = '';
+    document.getElementById('sp_confirm').value = '';
+    document.getElementById('err_setpw').textContent = '';
+    document.getElementById('sp_password').focus();
+  }
+  function showEnterPasswordScreen(){
+    document.getElementById('lockScreen').hidden = false;
+    document.getElementById('appRoot').hidden = true;
+    document.getElementById('lockTitle').textContent = 'Enter Password';
+    document.getElementById('lockSubtitle').textContent = 'This register is password protected.';
+    document.getElementById('setPasswordForm').hidden = true;
+    document.getElementById('enterPasswordForm').hidden = false;
+    document.getElementById('ep_password').value = '';
+    document.getElementById('err_enterpw').textContent = '';
+    document.getElementById('ep_password').focus();
+  }
+  async function unlockApp(){
+    document.getElementById('lockScreen').hidden = true;
+    document.getElementById('appRoot').hidden = false;
+    await loadCourseTypes();
+    await loadStudents();
+    renderAll();
+  }
+  async function handleSetPassword(e){
+    e.preventDefault();
+    var pw = document.getElementById('sp_password').value;
+    var cpw = document.getElementById('sp_confirm').value;
+    var err = document.getElementById('err_setpw');
+    err.textContent = '';
+    if(!pw || pw.length < 4){ err.textContent = 'Use at least 4 characters.'; return; }
+    if(pw !== cpw){ err.textContent = 'Passwords do not match.'; return; }
+    var hash = await sha256(pw);
+    try{
+      lsSet(PASSWORD_KEY, hash);
+    }catch(e2){
+      err.textContent = 'Could not save password — please try again.';
+      return;
+    }
+    storedPasswordHash = hash;
+    await unlockApp();
+    showToast('Password set');
+  }
+  async function handleEnterPassword(e){
+    e.preventDefault();
+    var pw = document.getElementById('ep_password').value;
+    var err = document.getElementById('err_enterpw');
+    err.textContent = '';
+    if(!pw){ err.textContent = 'Enter your password.'; return; }
+    var hash = await sha256(pw);
+    if(hash === storedPasswordHash){
+      await unlockApp();
+    } else {
+      err.textContent = 'Incorrect password. Try again.';
+      document.getElementById('ep_password').value = '';
+      document.getElementById('ep_password').focus();
+    }
+  }
+  function handleForgotPassword(){
+    showConfirm(
+      'Reset password & data?',
+      'There is no way to recover a forgotten password since this app has no server. Resetting will permanently erase your password AND every saved student and payment record. This cannot be undone.',
+      async function(){
+        lsDel(PASSWORD_KEY); lsDel(STORAGE_KEY); lsDel(COURSE_KEY);
+        storedPasswordHash = null;
+        students = [];
+        courseTypes = DEFAULT_COURSES.slice();
+        showSetPasswordScreen();
+        showToast('Everything has been reset');
+      }
+    );
+  }
+  function openChangePwModal(){
+    document.getElementById('cp_current').value = '';
+    document.getElementById('cp_new').value = '';
+    document.getElementById('cp_confirm').value = '';
+    document.getElementById('err_changepw').textContent = '';
+    document.getElementById('changePwOverlay').hidden = false;
+    document.getElementById('cp_current').focus();
+  }
+  function closeChangePwModal(){
+    document.getElementById('changePwOverlay').hidden = true;
+  }
+  async function handleChangePassword(e){
+    e.preventDefault();
+    var current = document.getElementById('cp_current').value;
+    var next = document.getElementById('cp_new').value;
+    var confirmNext = document.getElementById('cp_confirm').value;
+    var err = document.getElementById('err_changepw');
+    err.textContent = '';
+    var currentHash = await sha256(current);
+    if(currentHash !== storedPasswordHash){ err.textContent = 'Current password is incorrect.'; return; }
+    if(!next || next.length < 4){ err.textContent = 'New password must be at least 4 characters.'; return; }
+    if(next !== confirmNext){ err.textContent = 'New passwords do not match.'; return; }
+    var newHash = await sha256(next);
+    try{
+      lsSet(PASSWORD_KEY, newHash);
+    }catch(e2){
+      err.textContent = 'Could not save — please try again.';
+      return;
+    }
+    storedPasswordHash = newHash;
+    closeChangePwModal();
+    showToast('Password updated');
+  }
+  function lockNow(){
+    document.getElementById('appRoot').hidden = true;
+    showEnterPasswordScreen();
+  }
+
+  // ---------- Event wiring ----------
+  function wireEvents(){
+    document.getElementById('setPasswordForm').addEventListener('submit', handleSetPassword);
+    document.getElementById('enterPasswordForm').addEventListener('submit', handleEnterPassword);
+    document.getElementById('forgotPwBtn').addEventListener('click', handleForgotPassword);
+    document.getElementById('changePwBtn').addEventListener('click', openChangePwModal);
+    document.getElementById('changePwClose').addEventListener('click', closeChangePwModal);
+    document.getElementById('changePwCancel').addEventListener('click', closeChangePwModal);
+    document.getElementById('changePwForm').addEventListener('submit', handleChangePassword);
+    document.getElementById('lockNowBtn').addEventListener('click', lockNow);
+
+    document.getElementById('f_class').addEventListener('change', function(e){
+      var newInput = document.getElementById('f_class_new');
+      if(e.target.value === '__new__'){ newInput.hidden = false; newInput.focus(); }
+      else { newInput.hidden = true; newInput.value = ''; }
+    });
+
+    document.getElementById('prevMonthBtn').addEventListener('click', function(){
+      currentMonth = addMonths(currentMonth, -1);
+      renderAll();
+    });
+    document.getElementById('nextMonthBtn').addEventListener('click', function(){
+      currentMonth = addMonths(currentMonth, 1);
+      renderAll();
+    });
+    document.getElementById('thisMonthBtn').addEventListener('click', function(){
+      currentMonth = getRealCurrentMonth();
+      renderAll();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function(e){
+      searchTerm = e.target.value;
+      renderTable();
+    });
+    document.getElementById('classFilterSelect').addEventListener('change', function(e){
+      classFilter = e.target.value;
+      renderTable();
+    });
+    document.getElementById('statusChips').addEventListener('click', function(e){
+      var btn = e.target.closest('.chip');
+      if(!btn) return;
+      document.querySelectorAll('#statusChips .chip').forEach(function(c){ c.classList.remove('active'); });
+      btn.classList.add('active');
+      statusFilter = btn.dataset.status;
+      renderTable();
+    });
+
+    document.getElementById('openAddStudent').addEventListener('click', openAddStudentModal);
+    document.getElementById('studentModalClose').addEventListener('click', closeStudentModal);
+    document.getElementById('studentCancel').addEventListener('click', closeStudentModal);
+    document.getElementById('studentForm').addEventListener('submit', handleStudentSubmit);
+
+    document.getElementById('detailModalClose').addEventListener('click', closeDetailModal);
+
+    document.getElementById('paymentModalClose').addEventListener('click', closePaymentModal);
+    document.getElementById('paymentCancel').addEventListener('click', closePaymentModal);
+    document.getElementById('paymentForm').addEventListener('submit', handlePaymentSubmit);
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirm);
+    document.getElementById('confirmOkBtn').addEventListener('click', function(){
+      var action = confirmAction;
+      closeConfirm();
+      if(action) action();
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+    document.getElementById('resetDataBtn').addEventListener('click', function(){
+      showConfirm('Clear all data?', 'This permanently deletes every registered student and payment record. This cannot be undone.', async function(){
+        students = [];
+        await saveStudents();
+        renderAll();
+        showToast('All data cleared');
+      });
+    });
+
+    [['studentModalOverlay', closeStudentModal], ['detailModalOverlay', closeDetailModal], ['paymentModalOverlay', closePaymentModal], ['changePwOverlay', closeChangePwModal]].forEach(function(pair){
+      document.getElementById(pair[0]).addEventListener('click', function(e){
+        if(e.target.id === pair[0]) pair[1]();
+      });
+    });
+
+    document.addEventListener('keydown', function(e){
+      if(e.key !== 'Escape') return;
+      if(!document.getElementById('confirmOverlay').hidden) closeConfirm();
+      else if(!document.getElementById('changePwOverlay').hidden) closeChangePwModal();
+      else if(!document.getElementById('paymentModalOverlay').hidden) closePaymentModal();
+      else if(!document.getElementById('detailModalOverlay').hidden) closeDetailModal();
+      else if(!document.getElementById('studentModalOverlay').hidden) closeStudentModal();
+    });
+  }
+
+  // ---------- Init ----------
+  async function init(){
+    wireEvents();
+    await loadPasswordHash();
+    if(storedPasswordHash){
+      showEnterPasswordScreen();
+    } else {
+      showSetPasswordScreen();
+    }
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
